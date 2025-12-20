@@ -1,5 +1,7 @@
 import re
 import gi
+import os
+
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
@@ -37,7 +39,7 @@ def select_input_file():
     filename = dialog.get_filename() if response == Gtk.ResponseType.ACCEPT else None
     dialog.destroy()
     return filename
-
+    
 '''
 def select_output_file():
     root = tk.Tk()
@@ -49,7 +51,7 @@ def select_output_file():
     )
 '''
 
-def select_output_file():
+def select_output_file(default_dir):
     dialog = Gtk.FileChooserNative(
         title="Save LibreOffice Calc file",
         action=Gtk.FileChooserAction.SAVE
@@ -57,6 +59,9 @@ def select_output_file():
 
     dialog.set_do_overwrite_confirmation(True)
     dialog.set_current_name("keff_results.ods")
+
+    if default_dir and os.path.isdir(default_dir):
+        dialog.set_current_folder(default_dir)
 
     ods_filter = Gtk.FileFilter()
     ods_filter.set_name("LibreOffice Calc (*.ods)")
@@ -74,6 +79,29 @@ def select_output_file():
 
     return filename
 
+def show_message(text, title="Info"):
+    dialog = Gtk.MessageDialog(
+        transient_for=None,
+        flags=0,
+        message_type=Gtk.MessageType.INFO,
+        buttons=Gtk.ButtonsType.OK,
+        text=title,
+    )
+    dialog.format_secondary_text(text)
+    dialog.run()
+    dialog.destroy()
+
+def show_error(text, title="Error"):
+    dialog = Gtk.MessageDialog(
+        transient_for=None,
+        flags=0,
+        message_type=Gtk.MessageType.ERROR,
+        buttons=Gtk.ButtonsType.CLOSE,
+        text=title,
+    )
+    dialog.format_secondary_text(text)
+    dialog.run()
+    dialog.destroy()
 
 def parse_keff_values(filepath):
     analog_values = []
@@ -137,26 +165,33 @@ def create_spreadsheet(analog_values, implicit_values, output_path):
 def main():
     input_file = select_input_file()
     if not input_file:
-        messagebox.showerror("Error", "No input file selected.")
+        show_error("No input file selected.")
         return
+
+    input_dir = os.path.dirname(input_file)
+    '''if not input_file:
+        messagebox.showerror("Error", "No input file selected.")
+        return'''
 
     analog_values, implicit_values = parse_keff_values(input_file)
 
     if not analog_values and not implicit_values:
-        messagebox.showerror("Error", "No k-eff values found.")
+        show_error("No k-eff values found in the selected file.")
         return
 
-    output_file = select_output_file()
+    output_file = select_output_file(input_dir)
     if not output_file:
-        messagebox.showerror("Error", "No output file selected.")
+        #messagebox.showerror("Error", "No output file selected.")
+        show_error("No output file selected.")
         return
 
     create_spreadsheet(analog_values, implicit_values, output_file)
 
-    messagebox.showinfo(
+    '''messagebox.showinfo(
         "Done",
         f"Spreadsheet successfully saved:\n{output_file}"
-    )
+    )'''
+    show_message(f"Spreadsheet successfully saved:\n{output_file}", "Done")
 
 
 if __name__ == "__main__":
