@@ -187,15 +187,15 @@ def create_spreadsheet(analog_values, implicit_values, output_path):
         row.addElement(TableCell())
 
         # Column B – Analog
-        cell_b = TableCell()
+        cell_b = TableCell(valuetype="float", value=analog_values[i])#TableCell()
         if i < len(analog_values):
-            cell_b.addElement(P(text=str(analog_values[i])))
+            cell_b.addElement(P(text=f"{analog_values[i]:.5f}"))#(P(text=str(analog_values[i])))
         row.addElement(cell_b)
 
         # Column C – Implicit
-        cell_c = TableCell()
+        cell_c = TableCell(valuetype="float", value=implicit_values[i])#TableCell()
         if i < len(implicit_values):
-            cell_c.addElement(P(text=str(implicit_values[i])))
+            cell_c.addElement(P(text=f"{implicit_values[i]:.5f}"))#(P(text=str(implicit_values[i])))
         row.addElement(cell_c)
 
         table.addElement(row)
