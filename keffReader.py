@@ -1,6 +1,8 @@
 import re
 import gi
+import subprocess
 import os
+import shutil
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
@@ -51,29 +53,36 @@ def select_output_file():
     )
 '''
 
-def select_output_file(default_dir):
+def select_output_file(default_dir, input_file_path):
+    # Extract the base name of the input file without extension
+    base_name = os.path.splitext(os.path.basename(input_file_path))[0]
+    default_save_name = f"{base_name}.ods"
+
     dialog = Gtk.FileChooserNative(
         title="Save LibreOffice Calc file",
         action=Gtk.FileChooserAction.SAVE
     )
-
+    
+    # Suggest default name
     dialog.set_do_overwrite_confirmation(True)
-    dialog.set_current_name("keff_results.ods")
+    dialog.set_current_name(default_save_name)#("keff_results.ods")
 
+    # Set default folder
     if default_dir and os.path.isdir(default_dir):
         dialog.set_current_folder(default_dir)
 
+    # Add ODS filter
     ods_filter = Gtk.FileFilter()
     ods_filter.set_name("LibreOffice Calc (*.ods)")
-    ods_filter.add_mime_type(
-        "application/vnd.oasis.opendocument.spreadsheet"
-    )
+    ods_filter.add_mime_type("application/vnd.oasis.opendocument.spreadsheet")
     dialog.add_filter(ods_filter)
 
+    # Run dialog
     response = dialog.run()
     filename = dialog.get_filename() if response == Gtk.ResponseType.ACCEPT else None
     dialog.destroy()
 
+    # Ensure .ods extension
     if filename and not filename.lower().endswith(".ods"):
         filename += ".ods"
 
@@ -103,6 +112,13 @@ def show_error(text, title="Error"):
     dialog.run()
     dialog.destroy()
 
+def open_ods_file(path):
+    if os.path.isfile(path):
+        try:
+            subprocess.run(["libreoffice", path], check=True)
+        except Exception as e:
+            print(f"Failed to open file: {e}")
+
 def parse_keff_values(filepath):
     analog_values = []
     implicit_values = []
@@ -131,12 +147,29 @@ def create_spreadsheet(analog_values, implicit_values, output_path):
     doc = OpenDocumentSpreadsheet()
     table = Table(name="k-eff data")
 
-    start_row = 9  # LibreOffice rows are 1-based
+    start_row = 9  # first data row (1-based)
+    header_row_index = start_row - 1
+    for _ in range(header_row_index - 1):
+        table.addElement(TableRow())
+
+    header_row = TableRow()
+
+    # Column A (empty)
+    header_row.addElement(TableCell())
+
+    # Column B — Analog
+    keffAnalogHeader = TableCell()
+    keffAnalogHeader.addElement(P(text="k-eff (analog)"))
+    header_row.addElement(keffAnalogHeader)
+
+    # Column C — Implicit
+    keffImplicitHeader = TableCell()
+    keffImplicitHeader.addElement(P(text="k-eff (implicit)"))
+    header_row.addElement(keffImplicitHeader)
+
+    table.addElement(header_row)
 
     max_len = max(len(analog_values), len(implicit_values))
-
-    for i in range(start_row - 1):
-        table.addElement(TableRow())
 
     for i in range(max_len):
         row = TableRow()
@@ -161,7 +194,6 @@ def create_spreadsheet(analog_values, implicit_values, output_path):
     doc.spreadsheet.addElement(table)
     doc.save(output_path)
 
-
 def main():
     input_file = select_input_file()
     if not input_file:
@@ -179,7 +211,7 @@ def main():
         show_error("No k-eff values found in the selected file.")
         return
 
-    output_file = select_output_file(input_dir)
+    output_file = select_output_file(input_dir, input_file)
     if not output_file:
         #messagebox.showerror("Error", "No output file selected.")
         show_error("No output file selected.")
@@ -192,7 +224,12 @@ def main():
         f"Spreadsheet successfully saved:\n{output_file}"
     )'''
     show_message(f"Spreadsheet successfully saved:\n{output_file}", "Done")
-
+    #open_ods_file(output_file) #python runtime blocking
+    #subprocess.Popen(["libreoffice", output_file])
+    if shutil.which("libreoffice"):
+        subprocess.Popen(["libreoffice", output_file])
+    else:
+        subprocess.Popen(["xdg-open", output_file])
 
 if __name__ == "__main__":
     main()
