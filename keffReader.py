@@ -1,3 +1,11 @@
+'''
+A GUI application to read k-eff values from a UTF-8 text file and export them to a LibreOffice Calc (.ods) spreadsheet.
+Comments, suggestions, and contributions are welcome!
+Author: Javier Alonzo ROMO LEON
+Feel free to interact with me:
+https://sites.google.com/view/b-eng-jarl/home
+'''
+
 import re
 import gi
 import subprocess
