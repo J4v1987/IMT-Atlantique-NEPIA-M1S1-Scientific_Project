@@ -1,3 +1,4 @@
+import re
 import gi
 import subprocess
 import os
@@ -59,9 +60,73 @@ def select_input_files():
 
     return files
 
-def copy_automatic_styles(src_doc, dst_doc):
+'''
+def copy_all_styles(src_doc, dst_doc):
+    #Copy automatic styles from source to destination document
     for style in src_doc.automaticstyles.childNodes:
         dst_doc.automaticstyles.addElement(copy.deepcopy(style))
+
+    # Copy common styles (this fixes number formats & borders)
+    for style in src_doc.styles.childNodes:
+        if style.tagName.startswith("loext:"):
+            continue
+        dst_doc.styles.addElement(copy.deepcopy(style))
+'''
+def copy_all_styles(src_doc, dst_doc, prefix):
+    # automatic styles
+    for style in src_doc.automaticstyles.childNodes:
+        if style.tagName.startswith("loext:"):
+            continue
+        s = copy.deepcopy(style)
+        prefix_style(s, prefix)
+        if s.getAttribute("name"):
+            dst_doc.automaticstyles.addElement(s)  # add only once
+
+    # common styles
+    for style in src_doc.styles.childNodes:
+        if style.tagName.startswith("loext:"):
+            continue
+        s = copy.deepcopy(style)
+        prefix_style(s, prefix)
+        if s.getAttribute("name"):
+            dst_doc.styles.addElement(s)  # add only once
+
+def remap_sheet_style_references(sheet, prefix):
+    for node in sheet.childNodes:
+        for attr in ("style-name", "default-cell-style-name"):
+            if node.hasAttribute(attr):
+                old = node.getAttribute(attr)
+                node.setAttribute(attr, f"{prefix}_{old}")
+
+'''
+def prefix_style(s, prefix):
+    # Prefix the top-level style
+    name = s.getAttribute("name")
+    if name:
+        s.setAttribute("name", f"{prefix}_{name}")
+
+    # Prefix sub-styles in children recursively
+    STYLE_TAGS = {
+    "style:style",
+    "style:table-cell-properties",
+    "number:number-style",
+    "number:currency-style",
+    "number:percentage-style",
+    "number:scientific-number",
+    # add more if needed
+    }
+
+    for child in s.childNodes:
+        prefix_style(child, prefix)
+'''
+
+def prefix_style(s, prefix):
+    # Prefix this element if it has a name
+    if "name" in s.attributes:
+        s.setAttribute("name", f"{prefix}_{s.getAttribute('name')}")
+    # Recursively prefix all children
+    for child in s.childNodes:
+        prefix_style(child, prefix)
 
 def select_output_file(default_dir, input_file_path):
     # Extract the base name of the input file without extension
@@ -107,24 +172,29 @@ def merge_ods_workbooks(input_files, output_path):
         doc = load(ods_path)
 
         # Step 4: get first (and only) sheet
-        copy_automatic_styles(doc, pivot_doc) # Copy styles FIRST
+        #copy_all_styles(doc, pivot_doc)
+        prefix = os.path.splitext(os.path.basename(ods_path))[0]
+        
+        #Copy styles with namespacing
+        copy_all_styles(doc, pivot_doc, prefix)
+        
         sheets = doc.spreadsheet.getElementsByType(Table)
         if not sheets:
             show_error(f"No sheets found in {ods_path}")
             continue
-        '''
-        if not sheets:
-            continue
-        '''
 
-        sheet = sheets[0]
-
+        #sheet = sheets[0]
+        original_sheet = sheets[0]
+        sheet = copy.deepcopy(original_sheet)
+        remap_sheet_style_references(sheet, prefix)
+        
         # Rename sheet to workbook name (without extension)
-        base_name = os.path.splitext(os.path.basename(ods_path))[0]
-        sheet.setAttribute("name", base_name)
+        #base_name = os.path.splitext(os.path.basename(ods_path))[0]
+        sheet.setAttribute("name", prefix)
 
         # Step 5: deep-copy sheet into pivot workbook
-        pivot_doc.spreadsheet.addElement(copy.deepcopy(sheet))
+        #pivot_doc.spreadsheet.addElement(copy.deepcopy(sheet))
+        pivot_doc.spreadsheet.addElement(sheet)
 
         # Step 6: close source workbook
         doc = None  # explicit dereference (good habit)
