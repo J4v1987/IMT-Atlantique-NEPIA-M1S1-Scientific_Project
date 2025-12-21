@@ -121,10 +121,16 @@ def prefix_style(s, prefix):
 '''
 
 def prefix_style(s, prefix):
-    # Prefix this element if it has a name
+    # Only prefix elements that have a name
     if "name" in s.attributes:
-        s.setAttribute("name", f"{prefix}_{s.getAttribute('name')}")
-    # Recursively prefix all children
+        old_name = s.getAttribute("name")
+        new_name = f"{prefix}_{old_name}"
+        s.setAttribute("name", new_name)
+        # Update references in the element itself if present
+        for attr in ("style:name", "default-cell-style-name", "data-style-name"):
+            if attr in s.attributes:
+                s.setAttribute(attr, f"{prefix}_{s.getAttribute(attr)}")
+    # Recurse
     for child in s.childNodes:
         prefix_style(child, prefix)
 
