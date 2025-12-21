@@ -1,4 +1,3 @@
-import re
 import gi
 import subprocess
 import os
@@ -60,6 +59,9 @@ def select_input_files():
 
     return files
 
+def copy_automatic_styles(src_doc, dst_doc):
+    for style in src_doc.automaticstyles.childNodes:
+        dst_doc.automaticstyles.addElement(copy.deepcopy(style))
 
 def select_output_file(default_dir, input_file_path):
     # Extract the base name of the input file without extension
@@ -105,9 +107,15 @@ def merge_ods_workbooks(input_files, output_path):
         doc = load(ods_path)
 
         # Step 4: get first (and only) sheet
+        copy_automatic_styles(doc, pivot_doc) # Copy styles FIRST
         sheets = doc.spreadsheet.getElementsByType(Table)
         if not sheets:
+            show_error(f"No sheets found in {ods_path}")
             continue
+        '''
+        if not sheets:
+            continue
+        '''
 
         sheet = sheets[0]
 
