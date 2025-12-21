@@ -97,6 +97,7 @@ def select_output_file(default_dir, input_file_path):
 
     return filename
 
+
 def show_message(text, title="Info"):
     dialog = Gtk.MessageDialog(
         transient_for=None,
@@ -156,7 +157,7 @@ def create_spreadsheet(analog_values, implicit_values, output_path):
     doc = OpenDocumentSpreadsheet()
     table = Table(name="k-eff data")
 
-    start_row = 9  # first data row (1-based)
+    start_row = 14  # first data row (1-based)
     header_row_index = start_row - 1
     for _ in range(header_row_index - 1):
         table.addElement(TableRow())
