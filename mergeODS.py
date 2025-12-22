@@ -60,14 +60,48 @@ def select_input_files():
     return files
 
 def copy_all_styles(src_doc, dst_doc):
-    for style in src_doc.automaticstyles.childNodes:
+    added_styles = set()
+    # Copy automatic styles, but skip LibreOffice extensions
+    for style in list(src_doc.automaticstyles.childNodes):
+        if style.tagName.startswith("loext:"):
+            continue
+
+        if "name" not in style.attributes:
+            continue
+
+        name = style.getAttribute("name")
+        if not name or name in added_styles:
+            continue
+
+        added_styles.add(name)
         dst_doc.automaticstyles.addElement(copy.deepcopy(style))
     
     # Copy common styles, but skip LibreOffice extensions
-        for style in src_doc.styles.childNodes:
-            if style.tagName.startswith("loext:"):
-                continue
-            dst_doc.styles.addElement(copy.deepcopy(style))
+    for style in list(src_doc.styles.childNodes):
+        if style.tagName.startswith("loext:"):
+            continue
+
+        if "name" not in style.attributes:
+            continue
+        
+        name = style.getAttribute("name")
+        if not name or name in added_styles:
+            continue
+
+        added_styles.add(name)
+        dst_doc.styles.addElement(copy.deepcopy(style))
+
+'''
+def copy_all_styles(src_doc, dst_doc):
+    for style in list(src_doc.automaticstyles.childNodes):
+        dst_doc.automaticstyles.addElement(copy.deepcopy(style))
+    
+    # Copy common styles, but skip LibreOffice extensions
+    for style in list(src_doc.styles.childNodes):
+        if style.tagName.startswith("loext:"):
+            continue
+        dst_doc.styles.addElement(copy.deepcopy(style))
+'''
 
 def select_output_file(default_dir, input_file_path):
     # Extract the base name of the input file without extension
@@ -81,7 +115,8 @@ def select_output_file(default_dir, input_file_path):
     
     # Suggest default name
     dialog.set_do_overwrite_confirmation(True)
-    dialog.set_current_name(default_save_name)#("keff_results.ods")
+    #print(date())
+    dialog.set_current_name(default_save_name)#("k-eff Summary.ods")
 
     # Set default folder
     if default_dir and os.path.isdir(default_dir):
