@@ -9,6 +9,7 @@ from gi.repository import Gtk
 
 from odf.opendocument import load, OpenDocumentSpreadsheet
 from odf.table import Table
+from odf.namespaces import STYLENS
 
 def show_message(text, title="Info"):
     dialog = Gtk.MessageDialog(
@@ -63,28 +64,22 @@ def copy_all_styles(src_doc, dst_doc):
     added_styles = set()
     # Copy automatic styles, but skip LibreOffice extensions
     for style in list(src_doc.automaticstyles.childNodes):
-        if style.tagName.startswith("loext:"):
-            continue
-
-        if "name" not in style.attributes:
-            continue
-
-        name = style.getAttribute("name")
+        name = style.getAttrNS(STYLENS, "name")
         if not name or name in added_styles:
             continue
-
         added_styles.add(name)
         dst_doc.automaticstyles.addElement(copy.deepcopy(style))
-    
+
     # Copy common styles, but skip LibreOffice extensions
     for style in list(src_doc.styles.childNodes):
-        if style.tagName.startswith("loext:"):
+        if style.tagName != "style:style":
             continue
 
-        if "name" not in style.attributes:
+        family = style.getAttrNS(STYLENS, "family")
+        if family != "table-cell":
             continue
-        
-        name = style.getAttribute("name")
+
+        name = style.getAttrNS(STYLENS, "name")
         if not name or name in added_styles:
             continue
 
