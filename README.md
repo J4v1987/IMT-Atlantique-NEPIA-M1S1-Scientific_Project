@@ -15,12 +15,12 @@
 </style>
 <div class="myDiv">
   <h2>keffReader.py :</h2>
-  <p>This script takes terminal outputs in *.txt format and scans for Serpent output data points. These are then ordered and listed into a new spreadsheet workbook.</p>
-  <p>User is to copy-paste Serpent terminal reports into a *.txt file. Then, the user is to input the *.txt file when prompted using local OS-native GUIs.</p>
+  <p>Description: This script takes terminal outputs in *.txt format and scans for Serpent output data points. These are then ordered and listed into a new spreadsheet workbook.</p>
+  <p>Usage: User is to copy-paste Serpent terminal reports into a *.txt file. Then, the user is to input the *.txt file when prompted using local OS-native GUIs.</p>
 </div>
 <div class="myDiv">
   <h2>mergeODS.py :</h2>
-  <p>This script merges keffReader.py outputs into a single workbook *.ods.</p>
-  <p>User is to select the keffReader.py out files when prompted using local OS-native GUIs.</p>
+  <p>Description: This script merges keffReader.py outputs into a single workbook *.ods.</p>
+  <p>Usage: User is to select the keffReader.py out files when prompted using local OS-native GUIs.</p>
 </div>
 
