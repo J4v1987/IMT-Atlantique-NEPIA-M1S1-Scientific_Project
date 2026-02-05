@@ -6,6 +6,13 @@
 <p>A single instance of Serpent usage resulted in up to 110 data points reported in an unstructured, human-readable only, terminal-based manner.</p>
 <p>The following scripts were created to assist the filtering and orderly listing of such data points in the interest of extending Serpent reported data points into first-principle-level Machine Learning models.</p>
 <p></p>
+<style>
+.myDiv {
+  border: 5px outset red;
+  background-color: lightblue;
+  text-align: center;
+}
+</style>
 <div class="myDiv">
   <h2>keffReader.py :</h2>
   <p>This script takes terminal outputs in *.txt format and scans for Serpent output data points. These are then ordered and listed into a new spreadsheet workbook.</p>
