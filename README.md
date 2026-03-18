@@ -4,7 +4,7 @@
 <br></br>
 <p>Serpent by VTT is a big-data processing tool used to simulate nuclear engineering principles.</p>
 <p>A single instance of Serpent usage resulted in up to 110 data points reported in an unstructured, human-readable only, terminal-based manner.</p>
-<p>The following scripts were created to assist the filtering and orderly listing of such data points in the interest of extending Serpent reported data points into first-principle-level Machine Learning models.</p>
+<p>The scripts found in this repository were created to assist the filtering and orderly listing of such data points into Excel friendly spreadsheets, in the interest of extending Serpent reported data points into first-principle-level Machine Learning models.</p>
 <p></p>
 
   
