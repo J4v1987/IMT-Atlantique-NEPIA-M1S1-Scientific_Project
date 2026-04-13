@@ -2,7 +2,6 @@ import gi
 import subprocess
 import os
 import copy
-import style    
 import shutil
 
 gi.require_version("Gtk", "3.0")
