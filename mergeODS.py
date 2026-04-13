@@ -2,6 +2,7 @@ import gi
 import subprocess
 import os
 import copy
+import style    
 import shutil
 
 gi.require_version("Gtk", "3.0")
@@ -68,7 +69,8 @@ def copy_all_styles(src_doc, dst_doc):
         if not name or name in added_styles:
             continue
         added_styles.add(name)
-        dst_doc.automaticstyles.addElement(copy.deepcopy(style))
+        #dst_doc.automaticstyles.addElement(copy.deepcopy(style))
+        dst_doc.automaticstyles.addElement(style.cloneNode(True))
 
     # Copy common styles, but skip LibreOffice extensions
     for style in list(src_doc.styles.childNodes):
@@ -84,7 +86,8 @@ def copy_all_styles(src_doc, dst_doc):
             continue
 
         added_styles.add(name)
-        dst_doc.styles.addElement(copy.deepcopy(style))
+        #dst_doc.styles.addElement(copy.deepcopy(style))
+        dst_doc.styles.addElement(style.cloneNode(True))
 
 '''
 def copy_all_styles(src_doc, dst_doc):
