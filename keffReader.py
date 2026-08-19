@@ -4,7 +4,7 @@ Ubuntu Linux is required to run this application since it uses GTK for the GUI a
 Comments, suggestions, and contributions are welcome!
 Author: Javier Alonzo ROMO LEON
 Feel free to interact with me:
-https://sites.google.com/view/b-eng-jarl/home
+https://www.linkedin.com/in/ja-rl/
 '''
 
 import re
